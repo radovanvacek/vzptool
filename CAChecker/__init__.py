@@ -36,3 +36,5 @@ class CAInfoUpdater(threading.Thread):
             self._db.update_cert_info(authority_key_identifier.value.key_identifier.hex(), issuer, self.ipv4, self.port)
         except ssl.SSLError as err:
             print(err)
+        except ConnectionError as err:
+            print('Connection error to Host {} on port {}'.format(self.ipv4, self.port) + '\n' + print(err))
