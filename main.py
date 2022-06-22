@@ -3,17 +3,20 @@
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
-# TODO: -p data/dc10.224.x_with_ping.xml data/dc10.225_with_ping.xml
+# TODO: -p data/dc10.224.x_with_ping.xml data/dc10.225_with_ping.xml data/dc10.244.x-with_ping.xml
 
 import getopt
 import sys
 import xml.sax
 
 import NmapXMLImporter
-from CAChecker import CAChecker
-from database import Database
+import database
+from CAChecker import CAInfoUpdater
+from HTTPSRedirectChecker import HTTSPRedirectChecker
 
-db = Database()
+db = database.Database()
+max_threads = 2
+limit = 1000
 
 
 def print_help():
@@ -21,8 +24,10 @@ def print_help():
 
 
 def main(argv):
+    opts = None
+    args = None
     try:
-        opts, args = getopt.getopt(argv, "hpc")
+        opts, args = getopt.getopt(argv, "hpcr")
     except getopt.GetoptError:
         print_help()
         exit(2)
@@ -37,15 +42,43 @@ def main(argv):
             print_help()
             exit(0)
         if opt == "-c":
-            print("collecting certificate chain information")
+            # print("collecting certificate chain information")
             collect_cert_chains()
+        if opt == "-r":
+            # print("checking redirects to HTTPS")
+            check_redirects()
+
+
+def __multithreaded_exec(thread=None, getter=None):
+    threads = []
+    runs = 1
+    res = getter(limit, 0)
+    while len(res):
+        item = res.pop()
+        while item:
+            threads = list(filter(lambda x: x._is_stopped is False, threads))
+            if len(threads) < max_threads:
+                ipv4, port = item
+                cur_thread = thread(ipv4, port)
+                threads.append(cur_thread)
+                cur_thread.start()
+                if len(res):
+                    item = res.pop()
+                else:
+                    break
+            else:
+                for t in threads:
+                    t.join()
+        runs += runs
+        res = getter(limit, runs)
+
+
+def check_redirects():
+    __multithreaded_exec(HTTSPRedirectChecker, db.get_http_redirect_expected_host)
 
 
 def collect_cert_chains():
-    ipv4, port = db.get_tls_enabled_host_port()[0]
-    print("collecting CA information for {}:{}".format(ipv4, port))
-    ca_checker = CAChecker(db)
-    ca_checker.get_cert_chain(ipv4, int(port))
+    __multithreaded_exec(CAInfoUpdater, db.get_tls_enabled_host)
 
 
 def parse_xml(args):

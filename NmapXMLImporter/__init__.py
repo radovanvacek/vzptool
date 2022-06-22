@@ -1,5 +1,4 @@
 import xml.sax
-import database
 
 
 class Service:
@@ -83,6 +82,22 @@ class Service:
     def host(self, value):
         self._host = value
 
+    @property
+    def product(self):
+        return self._product
+
+    @product.setter
+    def product(self, value):
+        self._product = value
+
+    @property
+    def product_version(self):
+        return self._product_version
+
+    @product_version.setter
+    def product_version(self, value):
+        self._product_version = value
+
     def __init__(self):
         self._ipv4 = ''
         self._ptr = ''
@@ -94,6 +109,8 @@ class Service:
         self._httpsRedir = ''
         self._authRequired = ''
         self._webOrAPI = ''
+        self._product = None
+        self._product_version = None
 
 
 class NmapXMLContentHandler(xml.sax.ContentHandler):
@@ -116,6 +133,11 @@ class NmapXMLContentHandler(xml.sax.ContentHandler):
             self._service.proto = attributes["protocol"]
         elif tag == "service":
             self._service.type = attributes["name"]
+            try:
+                self._service.product = attributes["product"]
+                self._service.product_version = attributes["version"]
+            except KeyError:
+                pass
 
     def endElement(self, tag):
         if tag == "port":
