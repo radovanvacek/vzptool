@@ -27,5 +27,6 @@ class HTTSPRedirectChecker(threading.Thread):
             else:
                 self._db.update_redirect_status(ipv4=self._ipv4, port=self._port, response=str(response.content))
         except (ConnectionError, NewConnectionError, MaxRetryError) as err:
-            print('Connection error to Host {} on port {}'.format(self._ipv4, self._port))
+            print('{} : Connection error to Host {} on port {}'.format(threading.current_thread().ident, self._ipv4,
+                                                                       self._port))
             print(err)
