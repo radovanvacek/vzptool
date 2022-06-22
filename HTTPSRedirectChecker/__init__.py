@@ -22,10 +22,10 @@ class HTTSPRedirectChecker(threading.Thread):
         self._db = database.Database(self._data_dir)
         try:
             response = requests.get(self._url, allow_redirects=False)
+            if response.status_code in (301, 302):
+                self._db.update_redirect_status(self._ipv4, self._port, str(response.content), True)
+            else:
+                self._db.update_redirect_status(ipv4=self._ipv4, port=self._port, response=str(response.content))
         except (ConnectionError, NewConnectionError, MaxRetryError) as err:
             print('Connection error to Host {} on port {}'.format(self._ipv4, self._port))
             print(err)
-        if response.status_code in (301, 302):
-            self._db.update_redirect_status(self._ipv4, self._port, str(response.content), True)
-        else:
-            self._db.update_redirect_status(ipv4=self._ipv4, port=self._port, response=str(response.content))
