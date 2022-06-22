@@ -6,8 +6,10 @@
 # TODO: -p data/dc10.224.x_with_ping.xml data/dc10.225_with_ping.xml data/dc10.244.x-with_ping.xml
 
 import getopt
+import os
 import sys
 import xml.sax
+from pathlib import Path
 
 import NmapXMLImporter
 import database
@@ -42,7 +44,7 @@ def main(argv):
             globals()['db'] = database.Database(globals()['data_dir'])
         if opt == "-p":
             print("parsing XML files {0}".format(arg))
-            parse_xml(arg)
+            parse_xml(os.getcwd() / Path(arg))
         if opt == "-h":
             print_help()
             exit(0)

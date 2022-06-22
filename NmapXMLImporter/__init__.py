@@ -116,22 +116,20 @@ class Service:
 class NmapXMLContentHandler(xml.sax.ContentHandler):
 
     def __init__(self, db):
-        self._service = ''
+        self._service = None
         self.db = db
 
     def startElement(self, tag, attributes):
-        if tag == "host" and self._service is not None:
-            """ send this object to database"""
         if tag == "status" and attributes['state'] == "up":
             self._service = Service()
-        elif tag == "address":
+        elif tag == "address" and self._service is not None:
             self._service.ipv4 = attributes['addr']
-        elif tag == "hostname" and attributes["type"] == "PTR":
+        elif tag == "hostname" and attributes["type"] == "PTR" and self._service is not None:
             self._service.ptr = attributes["name"]
-        elif tag == "port":
+        elif tag == "port" and self._service is not None:
             self._service.port = attributes["portid"]
             self._service.proto = attributes["protocol"]
-        elif tag == "service":
+        elif tag == "service" and self._service is not None:
             self._service.type = attributes["name"]
             try:
                 self._service.product = attributes["product"]
@@ -143,3 +141,5 @@ class NmapXMLContentHandler(xml.sax.ContentHandler):
         if tag == "port":
             # print(self._service.__dict__) #TODO: only for debug
             self.db.insert_service(self._service)
+        elif tag == "ports":
+            self._service = None
