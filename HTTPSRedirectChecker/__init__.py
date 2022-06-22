@@ -29,4 +29,4 @@ class HTTSPRedirectChecker(threading.Thread):
         except (ConnectionError, NewConnectionError, MaxRetryError) as err:
             print('{} : Connection error to Host {} on port {}'.format(threading.current_thread().ident, self._ipv4,
                                                                        self._port))
-            print(err)
+            print('{}'.format(threading.current_thread().ident) + ' : ' + err)

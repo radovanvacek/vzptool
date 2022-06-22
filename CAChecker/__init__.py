@@ -43,7 +43,7 @@ class CAInfoUpdater(threading.Thread):
                 authority_key_identifier = "oid 2.5.29.35 not included in cert"
                 self._db.update_cert_info(authority_key_identifier, issuer, self._ipv4,
                                           self._port)
-                print(err)
+                print('{}'.format(threading.current_thread().ident) + ' : ' + err)
         except (ConnectionError, ssl.SSLError) as err:
             print('{} : Connection error to Host {} on port {}'.format(threading.current_thread().ident, self._ipv4,
                                                                        self._port))
