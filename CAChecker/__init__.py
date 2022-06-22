@@ -37,11 +37,14 @@ class CAInfoUpdater(threading.Thread):
             try:
                 authority_key_identifier = parsed.extensions.get_extension_for_oid(
                     ExtensionOID.AUTHORITY_KEY_IDENTIFIER)
+                self._db.update_cert_info(authority_key_identifier.value.key_identifier.hex(), issuer, self._ipv4,
+                                          self._port)
             except ExtensionNotFound as err:
                 authority_key_identifier = "oid 2.5.29.35 not included in cert"
+                self._db.update_cert_info(authority_key_identifier, issuer, self._ipv4,
+                                          self._port)
                 print(err)
-            self._db.update_cert_info(authority_key_identifier.value.key_identifier.hex(), issuer, self._ipv4,
-                                      self._port)
+
         except ssl.SSLError as err:
             print(err)
         except ConnectionError as err:
