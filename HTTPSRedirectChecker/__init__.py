@@ -1,6 +1,7 @@
 import threading
 
 import requests
+from requests.exceptions import ConnectionError
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
 import database
