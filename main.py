@@ -14,7 +14,8 @@ import database
 from CAChecker import CAInfoUpdater
 from HTTPSRedirectChecker import HTTSPRedirectChecker
 
-db = database.Database()
+data_dir = r"data/pythonsqlite.db"
+db = database.Database(data_dir)
 max_threads = 2
 limit = 1000
 
@@ -27,7 +28,7 @@ def main(argv):
     opts = None
     args = None
     try:
-        opts, args = getopt.getopt(argv, "hpcr")
+        opts, args = getopt.getopt(argv, "hpcrd")
     except getopt.GetoptError:
         print_help()
         exit(2)
@@ -35,6 +36,10 @@ def main(argv):
         print_help()
         exit(0)
     for opt, arg in opts:
+        if opt == "-d":
+            print("setting data dir to {}".format(arg))
+            globals()['data_dir'] = arg
+            globals()['db'] = database.Database(globals()['data_dir'])
         if opt == "-p":
             print("parsing XML files {0}".format(args))
             parse_xml(args)
@@ -49,7 +54,7 @@ def main(argv):
             check_redirects()
 
 
-def __multithreaded_exec(thread=None, getter=None):
+def __multithreaded_exec(thread=None, getter=None, data_dir=globals()['data_dir']):
     threads = []
     runs = 1
     res = getter(limit, 0)
@@ -59,7 +64,7 @@ def __multithreaded_exec(thread=None, getter=None):
             threads = list(filter(lambda x: x._is_stopped is False, threads))
             if len(threads) < max_threads:
                 ipv4, port = item
-                cur_thread = thread(ipv4, port)
+                cur_thread = thread(ipv4, port, data_dir)
                 threads.append(cur_thread)
                 cur_thread.start()
                 if len(res):

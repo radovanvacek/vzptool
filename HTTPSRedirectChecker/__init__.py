@@ -8,16 +8,17 @@ import database
 
 class HTTSPRedirectChecker(threading.Thread):
 
-    def __init__(self, ipv4, port):
+    def __init__(self, ipv4, port, data_dir):
         super().__init__()
         self._db = None
         self._url = 'http://' + ipv4 + ':' + port
         self._ipv4 = ipv4
         self._port = port
+        self._data_dir = data_dir
 
     def run(self, n=None):
         print("{}: Checking for HTTP redirects on {}".format(threading.current_thread().ident, self._url))
-        self._db = database.Database()
+        self._db = database.Database(self._data_dir)
         try:
             response = requests.get(self._url, allow_redirects=False)
         except NewConnectionError as e:

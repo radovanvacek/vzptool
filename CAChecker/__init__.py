@@ -17,15 +17,16 @@ import database
 
 class CAInfoUpdater(threading.Thread):
 
-    def __init__(self, ipv4, port):
+    def __init__(self, ipv4, port, data_dir):
         super().__init__()
         self._db = None
         self.ipv4 = ipv4
         self.port = int(port)
+        self._data_dir = data_dir
 
     def run(self, n=None):
         print("{}: collecting CA information for {}:{}".format(threading.current_thread().ident, self.ipv4, self.port))
-        self._db = database.Database()
+        self._db = database.Database(self._data_dir)
 
         try:
             cert = ssl.get_server_certificate((self.ipv4, self.port), ssl.PROTOCOL_SSLv23)

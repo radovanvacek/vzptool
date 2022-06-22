@@ -18,8 +18,8 @@ class Database:
         except Error as e:
             print(e)
 
-    def __init__(self):
-        self.__create_connection(r"data/pythonsqlite.db")
+    def __init__(self, datadir):
+        self.__create_connection(datadir)
         # self.__conn.set_trace_callback(print)  # TODO: only for debug
         # self.__drop_services() # TODO: only for debug
         self.__create_services_table()
