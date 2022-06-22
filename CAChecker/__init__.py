@@ -37,4 +37,5 @@ class CAInfoUpdater(threading.Thread):
         except ssl.SSLError as err:
             print(err)
         except ConnectionError as err:
-            print('Connection error to Host {} on port {}'.format(self.ipv4, self.port) + '\n' + print(err))
+            print('Connection error to Host {} on port {}'.format(self.ipv4, self.port))
+            print(err)
