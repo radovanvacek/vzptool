@@ -30,3 +30,4 @@ class HTTSPRedirectChecker(threading.Thread):
             print('{} : Connection error to Host {} on port {}'.format(threading.current_thread().ident, self._ipv4,
                                                                        self._port))
             print('{}'.format(threading.current_thread().ident) + ' : ' + err)
+            self._db.update_redirect_status(ipv4=self._ipv4, port=self._port, response="Connection error")
