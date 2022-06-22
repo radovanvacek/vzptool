@@ -16,7 +16,7 @@ from HTTPSRedirectChecker import HTTSPRedirectChecker
 
 data_dir = r"data/pythonsqlite.db"
 db = database.Database(data_dir)
-max_threads = 2
+max_threads = 200
 limit = 1000
 
 
