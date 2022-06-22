@@ -1,5 +1,4 @@
 import threading
-from typing import Union
 
 import requests
 from urllib3.exceptions import NewConnectionError
@@ -22,7 +21,7 @@ class HTTSPRedirectChecker(threading.Thread):
         self._db = database.Database(self._data_dir)
         try:
             response = requests.get(self._url, allow_redirects=False)
-        except Union[ConnectionError, NewConnectionError] as err:
+        except (ConnectionError, NewConnectionError) as err:
             print('Connection error to Host {} on port {}'.format(self.ipv4, self.port))
             print(err)
         if response.status_code in (301, 302):
