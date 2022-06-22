@@ -28,7 +28,7 @@ def main(argv):
     opts = None
     args = None
     try:
-        opts, args = getopt.getopt(argv, "hpcrd")
+        opts, args = getopt.getopt(argv, "hp:crd:")
     except getopt.GetoptError:
         print_help()
         exit(2)
@@ -41,8 +41,8 @@ def main(argv):
             globals()['data_dir'] = arg
             globals()['db'] = database.Database(globals()['data_dir'])
         if opt == "-p":
-            print("parsing XML files {0}".format(args))
-            parse_xml(args)
+            print("parsing XML files {0}".format(arg))
+            parse_xml(arg)
         if opt == "-h":
             print_help()
             exit(0)
@@ -95,8 +95,7 @@ def parse_xml(args):
     # override the default ContextHandler
     handler = NmapXMLImporter.NmapXMLContentHandler(db)
     parser.setContentHandler(handler)
-    for file in args:
-        parser.parse(file)
+    parser.parse(args)
 
 
 if __name__ == '__main__':

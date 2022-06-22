@@ -7,6 +7,7 @@ import threading
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
+from cryptography.x509 import ExtensionNotFound
 from cryptography.x509.oid import ExtensionOID
 
 import database
@@ -33,7 +34,12 @@ class CAInfoUpdater(threading.Thread):
             cert = ssl.get_server_certificate((self._ipv4, self._port), ssl.PROTOCOL_SSLv23)
             parsed = x509.load_pem_x509_certificate(str.encode(cert), default_backend())
             issuer = parsed.issuer.rfc4514_string()
-            authority_key_identifier = parsed.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_KEY_IDENTIFIER)
+            try:
+                authority_key_identifier = parsed.extensions.get_extension_for_oid(
+                    ExtensionOID.AUTHORITY_KEY_IDENTIFIER)
+            except ExtensionNotFound as err:
+                authority_key_identifier = "oid 2.5.29.35 not included in cert"
+                print(err)
             self._db.update_cert_info(authority_key_identifier.value.key_identifier.hex(), issuer, self._ipv4,
                                       self._port)
         except ssl.SSLError as err:
