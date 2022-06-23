@@ -24,7 +24,7 @@ class APIOrWebChecker(threading.Thread):
             "{}: Getting response after all redirects {}".format(threading.current_thread().ident, self._url))
         self._db = database.Database(self._data_dir)
         try:
-            response = requests.get(self._url)
+            response = requests.get(self._url, verify=False)
             is_for_people = self.analyze(response)
             self._db.update_web_or_api(self._ipv4, self._port, is_for_people)
         except (ConnectionError, NewConnectionError, MaxRetryError) as err:
