@@ -29,7 +29,7 @@ class APIOrWebChecker(threading.Thread):
             self._db.update_web_or_api(self._ipv4, self._port, is_for_people)
         except (ConnectionError, NewConnectionError, MaxRetryError) as err:
             self._logger.error('{} : Connection error to {}'.format(threading.current_thread().ident, self._url))
-            self._logger.error('{} : '.format(threading.current_thread().ident, err))
+            self._logger.error('{} : {}'.format(threading.current_thread().ident, err))
             self._db.update_web_or_api(ipv4=self._ipv4, port=self._port, is_for_people="Connection error")
 
     def analyze(self, response):
