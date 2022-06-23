@@ -68,7 +68,7 @@ def __multithreaded_exec(thread=None, getter=None, data_dir=globals()['data_dir'
     while len(res):
         item = res.pop()
         while item:
-            threads = list(filter(lambda x: x._is_stopped is False, threads))
+            threads = list(filter(lambda x: x.is_alive(), threads))
             if len(threads) < max_threads:
                 service_type, ipv4, port = item
                 cur_thread = thread(service_type, ipv4, port, data_dir)
