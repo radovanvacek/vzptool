@@ -32,6 +32,11 @@ class CAInfoUpdater(threading.Thread):
 
         try:
             cert = ssl.get_server_certificate((self._ipv4, self._port), ssl.PROTOCOL_SSLv23)
+            # conn = ssl.create_connection((self._ipv4, self._port))
+            # context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+            # context.set_ciphers('ALL:@SECLEVEL=1')
+            # sock = context.wrap_socket(conn, server_hostname=self._ipv4)
+            # cert = ssl.DER_cert_to_PEM_cert(sock.getpeercert(True))
             parsed = x509.load_pem_x509_certificate(str.encode(cert), default_backend())
             issuer = parsed.issuer.rfc4514_string()
             try:

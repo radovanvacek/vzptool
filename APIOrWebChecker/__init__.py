@@ -1,0 +1,45 @@
+import threading
+
+import requests
+from requests.exceptions import ConnectionError
+from urllib3.exceptions import NewConnectionError, MaxRetryError
+
+import database
+
+
+class APIOrWebChecker(threading.Thread):
+
+    def __init__(self, service_type, ipv4, port, data_dir):
+        super().__init__()
+        self._db = None
+        self._url = service_type + '://' + ipv4 + ':' + port
+        self._ipv4 = ipv4
+        self._port = port
+        self._data_dir = data_dir
+
+    def run(self, n=None):
+        print("{}: Getting response after all redirects {}".format(threading.current_thread().ident, self._url))
+        self._db = database.Database(self._data_dir)
+        try:
+            response = requests.get(self._url)
+            is_for_people = self.analyze(response)
+            self._db.update_web_or_api(self._ipv4, self._port, is_for_people)
+        except (ConnectionError, NewConnectionError, MaxRetryError) as err:
+            print('{} : Connection error to {}'.format(threading.current_thread().ident, self._url))
+            print('{} : '.format(threading.current_thread().ident, err))
+            # self._db.update_redirect_status(ipv4=self._ipv4, port=self._port, response="Connection error")
+
+    def analyze(self, response):
+        score = 0
+        score += len(list(self.findall('<img', response)))
+        score += len(list(self.findall('<script', response)))
+        score += len(list(self.findall('link rel="stylesheet"', response)))
+        return score
+
+    def findall(self, p, s):
+        '''Yields all the positions of
+        the pattern p in the string s.'''
+        i = str(s.content).find(p)
+        while i != -1:
+            yield i
+            i = str(s.content).find(p, i + 1)

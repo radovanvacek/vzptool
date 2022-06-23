@@ -13,13 +13,14 @@ from pathlib import Path
 
 import NmapXMLImporter
 import database
+from APIOrWebChecker import APIOrWebChecker
 from CAChecker import CAInfoUpdater
 from HTTPSRedirectChecker import HTTSPRedirectChecker
 
 data_dir = r"data/pythonsqlite.db"
 db = database.Database(data_dir)
-max_threads = 200
-limit = 1000
+max_threads = 20
+limit = 100
 
 
 def print_help():
@@ -30,7 +31,7 @@ def main(argv):
     opts = None
     args = None
     try:
-        opts, args = getopt.getopt(argv, "hp:crd:")
+        opts, args = getopt.getopt(argv, "hp:crd:w")
     except getopt.GetoptError:
         print_help()
         exit(2)
@@ -54,19 +55,22 @@ def main(argv):
         if opt == "-r":
             # print("checking redirects to HTTPS")
             check_redirects()
+        if opt == "-w":
+            # print("checking redirects to HTTPS")
+            analyze_http_responses()
 
 
 def __multithreaded_exec(thread=None, getter=None, data_dir=globals()['data_dir']):
     threads = []
-    runs = 1
-    res = getter(limit, 0)
+    runs = 0
+    res = getter(limit, runs)
     while len(res):
         item = res.pop()
         while item:
             threads = list(filter(lambda x: x._is_stopped is False, threads))
             if len(threads) < max_threads:
-                ipv4, port = item
-                cur_thread = thread(ipv4, port, data_dir)
+                servce_type, ipv4, port = item
+                cur_thread = thread(servce_type, ipv4, port, data_dir)
                 threads.append(cur_thread)
                 cur_thread.start()
                 if len(res):
@@ -78,6 +82,10 @@ def __multithreaded_exec(thread=None, getter=None, data_dir=globals()['data_dir'
                     t.join()
         runs += runs
         res = getter(limit, runs)
+
+
+def analyze_http_responses():
+    __multithreaded_exec(APIOrWebChecker, db.get_www_host)
 
 
 def check_redirects():

@@ -19,7 +19,8 @@ class Database:
             print(e)
 
     def __init__(self, datadir):
-        self.__create_connection(datadir)
+        self._datadir = datadir
+        self.__create_connection(self._datadir)
         # self.__conn.set_trace_callback(print)  # TODO: only for debug
         # self.__drop_services() # TODO: only for debug
         self.__create_services_table()
@@ -68,7 +69,7 @@ class Database:
 
     def insert_service(self, service):
         if self.__conn is None:
-            self.__create_connection(r"data/pythonsqlite.db")
+            self.__create_connection(self._datadir)
             if self.__conn is None:
                 print("could not create DB connection, exiting")
                 exit(3)
@@ -86,7 +87,7 @@ class Database:
     def get_tls_enabled_host(self, limit, runs):
 
         if self.__conn is None:
-            self.__create_connection(r"data/pythonsqlite.db")
+            self.__create_connection(self._datadir)
             if self.__conn is None:
                 print("could not create DB connection, exiting")
                 exit(3)
@@ -106,7 +107,7 @@ class Database:
     def update_cert_info(self, authority_key_identifier, issuer_rfc, ipv4, port):
 
         if self.__conn is None:
-            self.__create_connection(r"data/pythonsqlite.db")
+            self.__create_connection(self._datadir)
             if self.__conn is None:
                 print("could not create DB connection, exiting")
                 exit(3)
@@ -123,7 +124,7 @@ class Database:
     def get_http_redirect_expected_host(self, limit, runs):
 
         if self.__conn is None:
-            self.__create_connection(r"data/pythonsqlite.db")
+            self.__create_connection(self._datadir)
             if self.__conn is None:
                 print("could not create DB connection, exiting")
                 exit(3)
@@ -142,7 +143,7 @@ class Database:
 
     def update_redirect_status(self, ipv4, port, response, has_redirect=False):
         if self.__conn is None:
-            self.__create_connection(r"data/pythonsqlite.db")
+            self.__create_connection(self._datadir)
             if self.__conn is None:
                 print("could not create DB connection, exiting")
                 exit(3)
@@ -151,6 +152,40 @@ class Database:
             __update_cert_info_sql = """UPDATE services SET _https_redir = ? , _https_redir_reply = ?\
                     WHERE _ipv4 = ? AND _port = ?"""
             cursor.execute(__update_cert_info_sql, (has_redirect, response, ipv4, port))
+            self.__conn.commit()
+        except Error as e:
+            print(e)
+            exit(3)
+
+    def get_www_host(self, limit, runs):
+        if self.__conn is None:
+            self.__create_connection(self._datadir)
+            if self.__conn is None:
+                print("could not create DB connection, exiting")
+                exit(3)
+        try:
+            cursor = self.__conn.cursor()
+            __get_tls_enabled_service_sql = "SELECT _type, _ipv4, _port FROM services " \
+                                            "WHERE   _type IN ({}) AND " \
+                                            "_web_or_api IS NULL LIMIT {} OFFSET {}" \
+                .format(self.http_protocol, limit, limit * runs)
+            cursor.execute(__get_tls_enabled_service_sql)
+            self.__conn.commit()
+            return cursor.fetchall()
+        except Error as e:
+            print(e)
+            exit(3)
+
+    def update_web_or_api(self, ipv4, port, is_for_people):
+        if self.__conn is None:
+            self.__create_connection(self._datadir)
+            if self.__conn is None:
+                print("could not create DB connection, exiting")
+                exit(3)
+        try:
+            cursor = self.__conn.cursor()
+            __update_cert_info_sql = """UPDATE services SET _web_or_api = ? WHERE _ipv4 = ? AND _port = ?"""
+            cursor.execute(__update_cert_info_sql, (is_for_people, ipv4, port))
             self.__conn.commit()
         except Error as e:
             print(e)
