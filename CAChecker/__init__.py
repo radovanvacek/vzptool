@@ -18,7 +18,7 @@ import database
 
 class CAInfoUpdater(threading.Thread):
 
-    def __init__(self, ipv4, port, data_dir):
+    def __init__(self, service_type, ipv4, port, data_dir):
         super().__init__()
         self._db = None
         self._ipv4 = ipv4

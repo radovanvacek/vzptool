@@ -93,7 +93,7 @@ class Database:
                 exit(3)
         try:
             cursor = self.__conn.cursor()
-            __get_tls_enabled_service_sql = "SELECT _ipv4, _port FROM services " \
+            __get_tls_enabled_service_sql = "SELECT _type, _ipv4, _port FROM services " \
                                             "WHERE   _type IN ({}) AND " \
                                             "_https_ca_authority_key_identifier IS NULL LIMIT {} OFFSET {}" \
                 .format(self.tls_enabled_services, limit, limit * runs)
@@ -130,7 +130,7 @@ class Database:
                 exit(3)
         try:
             cursor = self.__conn.cursor()
-            __get_tls_enabled_service_sql = "SELECT _ipv4, _port FROM services " \
+            __get_tls_enabled_service_sql = "SELECT _type, _ipv4, _port FROM services " \
                                             "WHERE   _type IN ({}) AND " \
                                             "_https_redir IS NULL LIMIT {} OFFSET {}" \
                 .format(self.https_redirect_expected, limit, limit * runs)
