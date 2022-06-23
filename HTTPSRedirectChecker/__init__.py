@@ -22,6 +22,8 @@ import requests
 
 s = requests.Session()
 s.mount('https://', MyAdapter())
+requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
 
 
 class HTTSPRedirectChecker(threading.Thread):
