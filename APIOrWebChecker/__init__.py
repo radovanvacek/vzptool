@@ -1,3 +1,4 @@
+import logging
 import threading
 
 import requests
@@ -16,18 +17,20 @@ class APIOrWebChecker(threading.Thread):
         self._ipv4 = ipv4
         self._port = port
         self._data_dir = data_dir
+        self._logger = logging.getLogger(__name__)
 
     def run(self, n=None):
-        print("{}: Getting response after all redirects {}".format(threading.current_thread().ident, self._url))
+        self._logger.info(
+            "{}: Getting response after all redirects {}".format(threading.current_thread().ident, self._url))
         self._db = database.Database(self._data_dir)
         try:
             response = requests.get(self._url)
             is_for_people = self.analyze(response)
             self._db.update_web_or_api(self._ipv4, self._port, is_for_people)
         except (ConnectionError, NewConnectionError, MaxRetryError) as err:
-            print('{} : Connection error to {}'.format(threading.current_thread().ident, self._url))
-            print('{} : '.format(threading.current_thread().ident, err))
-            # self._db.update_redirect_status(ipv4=self._ipv4, port=self._port, response="Connection error")
+            self._logger.error('{} : Connection error to {}'.format(threading.current_thread().ident, self._url))
+            self._logger.error('{} : '.format(threading.current_thread().ident, err))
+            self._db.update_web_or_api(ipv4=self._ipv4, port=self._port, is_for_people="Connection error")
 
     def analyze(self, response):
         score = 0

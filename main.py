@@ -6,6 +6,7 @@
 # TODO: -p data/dc10.224.x_with_ping.xml data/dc10.225_with_ping.xml data/dc10.244.x-with_ping.xml
 
 import getopt
+import logging
 import os
 import sys
 import xml.sax
@@ -22,7 +23,7 @@ data_dir = r"data/pythonsqlite.db"
 db = database.Database(data_dir)
 max_threads = 20
 limit = 100
-
+logging.getLogger(__name__).setLevel(logging.INFO)
 
 def print_help():
     print("""Usage: \n -p : parse the xmls\n -c : collect certificate chains""")
