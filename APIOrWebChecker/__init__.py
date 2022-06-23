@@ -13,7 +13,7 @@ class APIOrWebChecker(threading.Thread):
     def __init__(self, service_type, ipv4, port, data_dir):
         super().__init__()
         self._db = None
-        self._url = service_type + '://' + ipv4 + ':' + port
+        self._url = ('https', 'http')[service_type.find('https')] + '://' + ipv4 + ':' + port
         self._ipv4 = ipv4
         self._port = port
         self._data_dir = data_dir
