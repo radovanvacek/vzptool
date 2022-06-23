@@ -10,6 +10,7 @@ import os
 import sys
 import xml.sax
 from pathlib import Path
+from time import sleep
 
 import NmapXMLImporter
 import database
@@ -69,8 +70,8 @@ def __multithreaded_exec(thread=None, getter=None, data_dir=globals()['data_dir'
         while item:
             threads = list(filter(lambda x: x._is_stopped is False, threads))
             if len(threads) < max_threads:
-                servce_type, ipv4, port = item
-                cur_thread = thread(servce_type, ipv4, port, data_dir)
+                service_type, ipv4, port = item
+                cur_thread = thread(service_type, ipv4, port, data_dir)
                 threads.append(cur_thread)
                 cur_thread.start()
                 if len(res):
@@ -78,8 +79,9 @@ def __multithreaded_exec(thread=None, getter=None, data_dir=globals()['data_dir'
                 else:
                     break
             else:
-                for t in threads:
-                    t.join()
+                sleep(1)
+                # for t in threads:
+                #     t.join()
         runs += runs
         res = getter(limit, runs)
 
